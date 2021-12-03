@@ -577,6 +577,21 @@ paths:
       responses:
         204:
           description: SuccessNoContent
+    patch:
+      security:
+        - HTTPBearer: []
+      summary: Update groups for user
+      operationId: PatchServiceUserGroup
+      tags:
+        - Users
+        - Services
+      parameters:
+        - $ref: '#components/parameters/serviceID'
+        - $ref: '#components/parameters/userID'
+        - $ref: '#components/parameters/groups'
+      responses:
+        204:
+          description: User secret updated
     delete:
       security:
         - HTTPBearer: []
@@ -591,12 +606,12 @@ paths:
       responses:
         204:
           description: SuccessNoContent
-  /services/{serviceID}/users/{userID}/secret:
-    patch:
+  /services/{serviceID}/users/{userID}/reset:
+    get:
       security:
         - HTTPBearer: []
       summary: Update user secret
-      operationId: PatchServiceUserSecret
+      operationId: GetServiceUserReset
       tags:
         - Users
         - Services
@@ -614,22 +629,6 @@ paths:
                   secret:
                     type: string
                     format: uuid
-  /services/{serviceID}/users/{userID}/group:
-    patch:
-      security:
-        - HTTPBearer: []
-      summary: Update groups for user
-      operationId: PatchServiceUserGroup
-      tags:
-        - Users
-        - Services
-      parameters:
-        - $ref: '#components/parameters/serviceID'
-        - $ref: '#components/parameters/userID'
-        - $ref: '#components/parameters/groups'
-      responses:
-        204:
-          description: User secret updated
   /services/{serviceID}/groups:
     get:
       security:
