@@ -10,6 +10,8 @@ components:
   responses:
       SuccessNoContent:
         description: Действие завершено, но контент не возвращается
+      NotFound:
+        description: Данный URL не существует
   securitySchemes:
     HTTPBasic:
       type: http
@@ -23,6 +25,13 @@ components:
       name: api_key
       in: query
   parameters:
+    accountID:
+      name: accountID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
     limit:
       name: limit
       in: query
@@ -344,51 +353,79 @@ paths:
         204:
           $ref: '#/components/responses/SuccessNoContent'
           description: OK No Content
-  /registrations/confirm/{registrationSecretKey}:
+  /confirm/{secretToken}:
     get:
       summary: Confirmation of email registration
-      operationId: GetRegistrationsConfirm
+      operationId: GetConfirm
       tags:
         - Registrations
       parameters:
-        - name: registrationSecretKey
+        - name: secretToken
           in: path
           required: true
           schema:
             type: string
             maxLength: 40
       responses:        
-        301:
-          description: Moved Permanently
-          headers:
-            Location:              
-              description: Redirect To
+        204:
+          $ref: '#/components/responses/SuccessNoContent'
+        404:
+          $ref: '#/components/responses/NotFound'
+  /recovery-password:
+    post:
+      summary: initial recovery password
+      operationId: PostRecoveryPasswordInit
+      tags:
+        - "Registrations"
+      requestBody:
+        description: "email пользователя, для отправки сообщения со ссылкой на восстановление пароля"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:        
+        200:
+          description: "recovery token"
+          content:
+            application/json:
               schema:
                 type: string
-                example: https://contentman.app
-  /registrations/refresh/{otp}:
-    get:
-      summary: Refresh password
-      operationId: GetRegistrationsRefreshConfirm
+                format: uuid
+  /recovery-password/{recoveryToken}:
+    post:
+      summary: completion recovery password
+      operationId: PostRecoveryPasswordComplete
       tags:
-        - Registrations
+        - "Registrations"
       parameters:
-        - name: otp
-          description: One Time Password
-          in: path
+        - name: recoveryToken
           required: true
+          in: path
           schema:
             type: string
-            maxLength: 40
-      responses:        
-        301:
-          description: Moved Permanently
-          headers:
-            Location:              
-              description: Redirect To /{accountID}/password
-              schema:
-                type: string
-                example: https://contentman.app/{accountID}/password
+            format: uuid
+      requestBody:
+        description: "новый пароль пользователя"
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: P@ssw0rd
+      responses:
+        204:
+          $ref: '#/components/responses/SuccessNoContent'
+        404:
+          $ref: '#/components/responses/NotFound'
+
   /services:
     get:
       security:
